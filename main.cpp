@@ -1,3 +1,16 @@
+// Face Detection and Monitor Brightness Adujustment
+// Mark Downs, Justin Guilarte
+
+/* This program detects your face through the opencv library 
+*       if a face is detected, the monitor brightness will be set to 100
+*       if a face is not detected, the monitor brightness will gradually decrease to 10
+*       face detection works in real time while running the program
+*  Assumptions and Details:
+*  This program uses the haas cascade algorithm included with the library
+*  This program can only affect brightness on windows machines 
+*  Must have OpenCV correctly installed in order for program to run 
+*/
+
 #include <opencv2\opencv.hpp>
 
 #include <vector>
@@ -11,7 +24,7 @@
 using namespace cv;
 using namespace std;
 
-
+// timer used for turning brightness up or down
 struct timer
 {
     unsigned long long elapsed_millisecs() const
@@ -27,6 +40,7 @@ int main() {
 
     double pScale = 4.0;
     timer t;
+    //default brightness values to adjust to
     int default_high = 100;
     int default_low = 10;
     CascadeClassifier faceObj;
@@ -36,7 +50,9 @@ int main() {
     if (!webcam.isOpened()) {
         return -1;
     }
-
+// infinite loop for program to run on
+// opens webcam and uses face detection and controls monitor brightness
+// stop program through console by pressing any key on keyboard
     for (;;) {
         Mat frame;
         webcam >> frame;
@@ -52,9 +68,9 @@ int main() {
 
         vector<Rect> faces;
         faceObj.detectMultiScale(grayscale, faces, 1.1, 3, 0, Size(30, 30));
-
+        // if face is not empty gradually increase brightness to 100
         if (faces.empty()) {
-            
+           
             //this_thread::sleep_for(chrono::seconds(15));
             for (int i = default_low; i <= default_high; i += 5) {
                 int brightness = i + 5;
@@ -66,6 +82,7 @@ int main() {
             }
             
         }
+        // else gradually reduce brightness to default
         else {
             for (int i = default_high; i >= default_low; i -= 5) {
                 int brightness = i - 5;
@@ -77,6 +94,7 @@ int main() {
             }
             
         }
+        //draws rectangle around face if it is detected
         for (Rect area : faces) {
             //set bgr color
             Scalar drawColor = Scalar(255, 0, 0);
@@ -86,7 +104,7 @@ int main() {
         }
 
         imshow("Program", frame);
-
+        //closes program if you press any key
         if (waitKey(60) >= 0) {
             break;
         }
